@@ -1,0 +1,9 @@
+D:\GitHub\StarboundSaveManager\StarboundSaveManager\bin\Debug\StarboundSaveManager.exe.config
+D:\GitHub\StarboundSaveManager\StarboundSaveManager\bin\Debug\StarboundSaveManager.exe
+D:\GitHub\StarboundSaveManager\StarboundSaveManager\bin\Debug\StarboundSaveManager.pdb
+D:\GitHub\StarboundSaveManager\StarboundSaveManager\obj\Debug\StarboundSaveManager.csprojResolveAssemblyReference.cache
+D:\GitHub\StarboundSaveManager\StarboundSaveManager\obj\Debug\StarboundSaveManager.Form1.resources
+D:\GitHub\StarboundSaveManager\StarboundSaveManager\obj\Debug\StarboundSaveManager.Properties.Resources.resources
+D:\GitHub\StarboundSaveManager\StarboundSaveManager\obj\Debug\StarboundSaveManager.csproj.GenerateResource.Cache
+D:\GitHub\StarboundSaveManager\StarboundSaveManager\obj\Debug\StarboundSaveManager.exe
+D:\GitHub\StarboundSaveManager\StarboundSaveManager\obj\Debug\StarboundSaveManager.pdb
