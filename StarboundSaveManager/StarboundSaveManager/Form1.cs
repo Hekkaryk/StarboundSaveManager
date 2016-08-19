@@ -87,7 +87,7 @@ namespace StarboundSaveManager
             try
             {
                 MessageBox.Show("Confirm to start restore.\nProgram may freeze until it finish copying files.");
-                //Directory.Backup(StarboundFolder, BackupsLocation);
+                Directory.Backup(StarboundFolder, BackupsLocation);
                 SelectedBackup = listViewBackups.SelectedItems[0].Text;
                 string selectedBackupPath = Path.Combine(BackupsLocation, SelectedBackup);
                 Directory.Restore(StarboundFolder, selectedBackupPath);
@@ -127,7 +127,7 @@ namespace StarboundSaveManager
                 {
                     listViewBackups.Items.Add(backup);
                 }
-            }            
+            }
         }
     }
 }
