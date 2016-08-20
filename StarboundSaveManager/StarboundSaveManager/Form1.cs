@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 
 namespace StarboundSaveManager
@@ -16,8 +17,16 @@ namespace StarboundSaveManager
             }
             set
             {
-                starboundFolder = value;
-                textBoxStarboundFolder.Text = value;
+                DirectoryInfo dir = new DirectoryInfo(value);
+                if (!dir.Exists)
+                {
+                    MessageBox.Show("Could not find Starbound installation folder. Remember to set it in Settings tab.");
+                } else
+                {
+                    starboundFolder = value;
+                    textBoxStarboundFolder.Text = value;
+                    settings.StarboundFolder = value;
+                }
             }
         }
         private string settingsFile;
@@ -31,38 +40,47 @@ namespace StarboundSaveManager
             {
                 settingsFile = value;
                 textBoxSettingsLocation.Text = value;
+                ReadSettings();
+                GetAvailableBackups();
             }
         }
-        private string backupsLocation;
-        public string BackupsLocation
+        private string backupFolder;
+        public string BackupFolder
         {
             get
             {
-                return backupsLocation;
+                return backupFolder;
             }
             set
             {
-                backupsLocation = value;
+                backupFolder = value;
                 textBoxBackupsLocation.Text = value;
+                settings.BackupFolder = value;
+            }
+        }
+        private bool autoBackup;
+        public bool AutoBackup
+        {
+            get
+            {
+                return autoBackup;
+            }
+            set
+            {
+                autoBackup = value;
+                checkBoxAutoBackup.Checked = value;
+                settings.AutoBackup = value;
             }
         }
         private string SelectedBackup { get; set; }
+        Settings settings = new Settings();
 
         public Form1()
         {
             InitializeComponent();
-            string temp = @"C:\Program Files (x86)\Steam\steamapps\common\Starbound";
-            DirectoryInfo dir = new DirectoryInfo(temp);
-            if (!dir.Exists)
-            {
-                MessageBox.Show("Could not find Starbound installation folder. Remember to set it in Settings tab.");
-            } else
-            {
-                StarboundFolder = temp;
-            }
-            temp = Path.GetDirectoryName(Application.ExecutablePath);
+            var temp = Path.GetDirectoryName(Application.ExecutablePath);
             SettingsFile = temp;
-            BackupsLocation = temp;
+            ReadSettings();
             GetAvailableBackups();
         }
 
@@ -71,7 +89,7 @@ namespace StarboundSaveManager
             try
             {
                 MessageBox.Show("Confirm to start backup.\nProgram may freeze until it finish copying files.");
-                string temp = Directory.Backup(StarboundFolder, BackupsLocation);
+                string temp = Directory.Backup(StarboundFolder, BackupFolder);
                 SelectedBackup = temp;
                 GetAvailableBackups();
                 MessageBox.Show("Backup complete!");
@@ -87,9 +105,9 @@ namespace StarboundSaveManager
             try
             {
                 MessageBox.Show("Confirm to start restore.\nProgram may freeze until it finish copying files.");
-                Directory.Backup(StarboundFolder, BackupsLocation);
+                if (AutoBackup) Directory.Backup(StarboundFolder, BackupFolder);
                 SelectedBackup = listViewBackups.SelectedItems[0].Text;
-                string selectedBackupPath = Path.Combine(BackupsLocation, SelectedBackup);
+                string selectedBackupPath = Path.Combine(BackupFolder, SelectedBackup);
                 Directory.Restore(StarboundFolder, selectedBackupPath);
                 MessageBox.Show("Restore complete!");
             }
@@ -114,20 +132,70 @@ namespace StarboundSaveManager
         private void buttonSelectBackupsLocation_Click(object sender, EventArgs e)
         {
             folderBrowserDialog1.ShowDialog();
-            BackupsLocation = folderBrowserDialog1.SelectedPath;
+            BackupFolder = folderBrowserDialog1.SelectedPath;
             GetAvailableBackups();
+        }
+
+        private void checkBoxAutoBackup_CheckedChanged(object sender, EventArgs e)
+        {
+            AutoBackup = checkBoxAutoBackup.Checked;
         }
 
         private void GetAvailableBackups()
         {
-            List<string> availableBackups = Directory.GetFolders(BackupsLocation);
+            listViewBackups.Items.Clear();
+            List<string> availableBackups = Directory.GetFolders(BackupFolder);
             if(availableBackups != null)
             {
                 foreach (string backup in availableBackups)
                 {
-                    listViewBackups.Items.Add(backup);
+                    if(backup.StartsWith("StarboundBackup"))
+                        listViewBackups.Items.Add(backup);
                 }
             }
+        }
+
+        private void ReadSettings()
+        {
+            try
+            {               
+                using (Stream stream = File.Open(Path.Combine(settingsFile,"StarboundSaveManager.settings"), FileMode.Open))
+                {
+                    settings = null;
+                    BinaryFormatter binaryFormatter = new BinaryFormatter();
+                    settings = (Settings)binaryFormatter.Deserialize(stream);
+                }
+                StarboundFolder = settings.StarboundFolder;
+                BackupFolder = settings.BackupFolder;
+                AutoBackup = settings.AutoBackup;
+            }
+            catch (FileNotFoundException)
+            {
+                StarboundFolder = settings.StarboundFolder;
+                BackupFolder = settings.BackupFolder;
+                AutoBackup = settings.AutoBackup;
+            }
+        }
+
+        private void SaveSettings()
+        {
+            try
+            {
+                using (Stream stream = File.Open(Path.Combine(settingsFile, "StarboundSaveManager.settings"), FileMode.Create))
+                {
+                    BinaryFormatter binaryFormatter = new BinaryFormatter();
+                    binaryFormatter.Serialize(stream, settings);
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Failed to save user preferences: " + e.Message);
+            }   
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveSettings();
         }
     }
 }
