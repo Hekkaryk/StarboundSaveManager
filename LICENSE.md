@@ -2,7 +2,7 @@ Copyright Hekkaryk 2016
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to use, 
-copy, modify, merge, publish and distribute copies of the Software, and to 
+copy, modify, publish and distribute copies of the Software, and to 
 permit persons to whom the Software is furnished to do so, subject to the 
 following conditions:
 
